@@ -73,3 +73,27 @@
   (t/is (= (:doc simpleton-with-doc-strings) "With a doc string\nor two"))
   ;; merges the second map
   (t/is (= (:someother/fun simpleton-with-doc-strings) :data/points)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; list-things, get-thing
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmacro defx [title & args]
+  (apply sut/defthing ::x title args))
+
+(defn list-xs [] (sut/list-things ::x))
+
+(defx one)
+(defx two {:hi :world})
+(defx three)
+
+(t/deftest list-things-test
+  (let [xs (list-xs)]
+    (t/is (= 3 (count xs)))
+    (t/is (= #{"one" "two" "three"} (->> xs (map :name) set)))))
+
+(defn get-x [pred] (sut/get-thing ::x pred))
+
+(t/deftest get-thing-test
+  (t/is (= "one" (-> (get-x (comp #{"one"} :name)) :name)))
+  (t/is (= "two" (-> (get-x (comp #{:world} :hi)) :name))))

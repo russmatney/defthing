@@ -14,7 +14,7 @@
   []
   (reset! registry* {}))
 
-(defn add-x
+(defn add-thing
   "Adds an x to the registry using the `thing-key`.
 
   Not expected to be used publicly - consumed by the `defthing` helper fn."
@@ -22,12 +22,12 @@
   (swap! registry* assoc-in
          [thing-key (::registry-key x)] x))
 
-(defn list-xs
+(defn list-things
   "Helper for building a `list-thing` function."
   [thing-key]
   (vals (get @registry* thing-key)))
 
-(defn get-x
+(defn get-thing
   "Helper for building a getter function for a specific defthing type.
   Expects to be passed the `thing-key` and a predicate that is run over all
   registered things for that key."
@@ -134,5 +134,5 @@
                 (reduce eval-xorf))]
      `(do
         (def ~thing-sym ~x)
-        (add-x ~thing-key ~x)
+        (add-thing ~thing-key ~x)
         ~x))))

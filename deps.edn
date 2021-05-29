@@ -1,2 +1,6 @@
 {:paths ["src"]
- :deps  {}}
+ :deps  {}
+
+ :aliases
+ {:dev {:jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]
+        :extra-paths ["test"]}}}

@@ -1,0 +1,16 @@
+#+TITLE: defthing README
+
+A utility for def-y macros.
+
+* Existing consumers
+** defcom (defcommand)
+** clawe/defbinding
+** clawe/defworkspace
+* Integrations
+** Rofi
+** Emacs Hydra
+** Window Manager Keybindings
+** Zsh completion
+** Docs
+* Features
+** Babashka compatible

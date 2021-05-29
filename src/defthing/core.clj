@@ -46,7 +46,7 @@
 
   xorf is one of:
   - a map to be merged into x
-  - a function to be called with x (to update it)
+  - a function to be called with x and then merged into the original.
   - a string to appended to the thing's `:doc` string.
 
   Returns the merged/updated x.
@@ -136,29 +136,3 @@
         (def ~thing-sym ~x)
         (add-x ~thing-key ~x)
         ~x))))
-
-(comment
-  ;; TODO convert to test suite?
-
-  ;; Example use:
-  (defmacro defsomething [title & args]
-    (apply defthing ::something title args))
-
-  (defsomething simpleton
-    {:some/other :data})
-
-  (defsomething my-simple-with-fns
-    {:just/a-map :data}
-    #(assoc % :some-fn/fn :data)
-    identity)
-
-  (defsomething my-simple-fn-then-x
-    (fn [x] (assoc x :somesecret/fun :data))
-    {:funfun/data :data})
-
-  (defsomething my-simple-anon-fn-then-x
-    #(assoc % :somesecret/fun :data)
-    "With a doc string"
-    #(assoc % :somesecret/fun :data)
-    "or two"
-    {:funfun/data :data}))

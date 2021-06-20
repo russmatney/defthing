@@ -21,8 +21,9 @@
   Commands are registered for a few integrations by default,
   including ralph.rofi support.
 
-  Every command gets a :name and :doc via defthing.
-  "
+  Every command gets a :name and :doc via defthing."
+  ;; NOTE all defcoms are evaled at every clawe/ralphie invocation - this may
+  ;; benefit from some optimization/caching/laziness, if performance feels slow
   [command-name & xorfs]
   (let [f (last xorfs)
         command-fn

@@ -1,18 +1,11 @@
 (ns defthing.defcom
   (:require
-   [defthing.core :as defthing]))
+   [defthing.core :as defthing]
+   [clojure.tools.cli :refer [parse-opts]]
+   ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; exec
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn exec
-  "Executes a passed defcom, passing the command in as the first argument."
-  [cmd & args]
-  (apply (:defcom/fn cmd) cmd args))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; defcom-2
+;; defcom macro
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmacro defcom
@@ -65,3 +58,67 @@
     (apply defthing/defthing :defcom/command command-name
            (conj xorfs {:defcom/fn command-fn}))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; exec
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn exec
+  "Executes a passed defcom, passing the command in as the first argument."
+  [cmd & args]
+  (apply (:defcom/fn cmd) cmd args))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; list commands
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn list-commands []
+  (defthing/list-things :defcom/command))
+
+(defn find-command [pred]
+  (defthing/get-thing :defcom/command pred))
+
+(defn find-command-by-name [n]
+  (defthing/get-thing :defcom/command (fn [{:keys [name]}] (= n name))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; built-in commands
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defcom help-command
+  (fn [_cmd & _args]
+    (println "Found commands: " (->> (list-commands)
+                                     (map #(str " | " (:name %)))
+                                     (apply str)))))
+
+(defcom name-collisions
+  (fn [& _]
+    (->> (list-commands)
+         (group-by :name)
+         (filter (comp #(> % 1) count second))
+         (map first)
+         ((fn [names]
+            (if (seq names)
+              (println "Duplicate defcom names: " names)
+              (println "No dupes detected")))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; public api
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn run [& args]
+  ;; intended to be suitable as a -main function or bb task
+  (let [{:keys [arguments]} (parse-opts args [])
+        command-name        (some-> arguments first)
+        command             (when command-name (find-command-by-name command-name))]
+    (when-not command-name
+      (println "No command name received. args: " arguments))
+    (when (and command-name (not command))
+      (println "No command found for command-name: "
+               command-name " from args: " arguments))
+    (if command
+      (do
+        (println "[defcom] exec: " command-name)
+        (exec command (rest arguments)))
+      ;; signal that no command was found
+      ;; consumers may decide to print a help message
+      :not-found)))

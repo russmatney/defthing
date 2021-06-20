@@ -113,9 +113,14 @@
     then merged)
   - a string (that currently appends a newline to a :doc key.)
 
+  The resulting map is automatically assigned a few key-vals:
+  - :type - `thing-key`, passed to defthing
+  - :name - `thing-sym`, a string version of the def-ed symbol (`title` or `name`)
+  - :ns   - the namespace the thing was defed in
+
   Ex:
-  (defmacro defworkspace [title & args]
-    (apply defthing/defthing :clawe/workspaces title args))
+  (defmacro defworkspace [name & args]
+    (apply defthing/defthing :clawe/workspaces name args))
 
   (defworkspace my-web-workspace
     \"Definition of my-web-workspace\"

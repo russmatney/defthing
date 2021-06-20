@@ -85,12 +85,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcom help-command
+  "My help command."
   (fn [_cmd & _args]
     (println "Found commands: " (->> (list-commands)
                                      (map #(str " | " (:name %)))
                                      (apply str)))))
 
 (defcom name-collisions
+  "Checks for defcom-style commands with name collisions."
   (fn [& _]
     (->> (list-commands)
          (group-by :name)
@@ -100,6 +102,28 @@
             (if (seq names)
               (println "Duplicate defcom names: " names)
               (println "No dupes detected")))))))
+
+(defcom doctor
+  "Checks if specified `{:defcom/depends-on [\"executables\"]}` exist, via `which`.
+
+TODO: Could be expanded/refactored into a more general defthing/doctor command."
+  (fn [& _]
+    (let [deps
+          (->> (list-commands)
+               (mapcat :doctor/depends-on)
+               (into #{})
+               ;; TODO finish this impl
+               ;; (filter
+               ;;   (fn [executable]
+               ;;     (-> (proc/$ which ~executable)
+               ;;         proc/check :out :string)))
+               ;; ((fn [deps-missing]
+               ;;    (if (seq deps-missing)
+               ;;      (println "Missing expected executables: " deps-missing)
+               ;;      (println "No dupes detected"))))
+               )]
+      (println "dependencies: " deps)
+      deps)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; public api
@@ -117,7 +141,10 @@
                command-name " from args: " arguments))
     (if command
       (do
+        ;; TODO honor some configured logger
+        ;; TODO consider integrating performance metrics
         (println "[defcom] exec: " command-name)
+        (println "[defcom] doc: " (:doc command))
         (exec command (rest arguments)))
       ;; signal that no command was found
       ;; consumers may decide to print a help message

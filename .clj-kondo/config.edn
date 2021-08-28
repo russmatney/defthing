@@ -1,7 +1,8 @@
-{:linters {:unresolved-symbol {:exclude [(babashka.process/ $)]}}
+{:linters {:unresolved-symbol {:exclude [(babashka.process/$)]}}
  :lint-as
- {defthing.core/defthing          clojure.core/def
-  defthing.defcom/defcom          clojure.core/def
-  defthing.core-test/defworkspace clojure.core/def
-  defthing.core-test/defsomething clojure.core/def
-  defthing.core-test/defx         clojure.core/def}}
+ {defthing.core/defthing             clojure.core/def
+  defthing.defcom/defcom             clojure.core/def
+  defthing.defworkspace/defworkspace clojure.core/def
+  defthing.core-test/defworkspace    clojure.core/def
+  defthing.core-test/defsomething    clojure.core/def
+  defthing.core-test/defx            clojure.core/def}}

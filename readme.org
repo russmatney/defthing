@@ -230,11 +230,17 @@ For perusing/contributing to sxhkd.
 ** defthings? x-or-fs? How does this work?
 defthing works mostly by merging maps together.
 
-Take ~defx~ for example.
+Take ~defx~ for example, (or run this in the user.clj)
 
-An implementation:
+#+BEGIN_SRC clojure
+(ns user
+  (:require
+   [defthing.core :as defthing]))
 
-#+begin_src clojure
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;  Implementation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (def x-key :clawe/xs)
 (defmacro defx [title & args]
   (apply defthing/defthing x-key title args))
@@ -244,32 +250,32 @@ An implementation:
 
 (defn get-x [x]
   (defthing/get-thing x-key (comp #{(:name x x)} :name)))
-#+end_src
 
-A consumer:
 
-#+begin_src clojure
+;; A consumer
 (defx my-x
   {:some/key "some-data"})
-#+end_src
 
-In this simple case, this is roughly equivalent to:
+;; In this simple case, this is roughly equivalent to:
+(def _my-x
+  {:name     "my-x"
+   :some/key "some-data"})
 
-#+begin_src clojure
-(def my-x
- {:name "my-x"
-  :some/key "some-data"})
-#+end_src
+;; the reality:
+{:defthing.core/registry-key :user/my-x
+ :name                       "my-x"
+ :type                       :clawe/xs
+ :ns                         "user"
+ :some/key                   "some-data"}
 
-A few other default fields omitted, such as the namespace.
+;; Now you can list all your ~xs~, or search for an ~x~ by name.
+(get-x "my-x")
+(list-xs)
 
-Now you can list all your ~xs~, or search for an ~x~ by name.
+;; ~defthing~ can be handed functions or maps. The maps are merged, and the
+;; functions are called with the state of the map - whatever has built up to that
+;; point.
 
-~defthing~ can be handed functions or maps. The maps are merged, and the
-functions are called with the state of the map - whatever has built up to that
-point.
-
-#+begin_src clojure
 (defx my-other-x
   {:number 7}
   ;; functions are handed the map to this point
@@ -282,10 +288,24 @@ point.
 
   ;; functions might fit some api
   {:some/important-function (fn [] (println "do something important"))})
-#+end_src
 
-You can find more examples in the unit tests, and more documentation on function
-docstrings in the src code.
+my-other-x ;; evals to:
+{:defthing.core/registry-key :user/my-other-x
+
+ :name     "my-other-x"
+ :type     :clawe/xs
+ :ns       "user"
+ :number   7
+ :x/id     "7-my-other-x"
+ :some/key :another/value
+
+ ;; note that functions like these don't always transit very well!
+ :some/important-function #function[user/fn--8463]}
+#+END_SRC
+
+You can find more examples in the unit tests, and more documentation on the
+function and macro docstrings in the source code.
+
 ** defthing is very much a work in progress
 I'm expanding use-cases for this all the time, and trying to find the right
 line to cut this abstraction on. Originally I thought only consumers should

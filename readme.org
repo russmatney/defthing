@@ -1,7 +1,17 @@
 #+TITLE: defthing
 #+OPTIONS: toc:nil
 
-A utility for def-y macros.
+* Deprecated
+
+This repository's code has been completely consumed in [[https://github.com/russmatney/clawe][russmatney/clawe]], where
+it has evolved along with that monorepo.
+
+Some recent refactors have moved away from using this macro completely for a few
+use-cases described below (client and workspace definitions for clawe's
+window-management features) - those are now supported by reading/writing to .edn
+config files.
+
+* A utility for def-y macros.
 
 *** ~defthing~ is a macrobuilder for definining ~things~.
 
